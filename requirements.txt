@@ -1,0 +1,2 @@
+# Optional dependencies for Flask backend:
+Flask>=2.0.0

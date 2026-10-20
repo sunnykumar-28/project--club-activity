@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club Activities Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+</head>
+<body>
+
+  <!-- 1. LOGIN & AUTH SCREEN WITH 3 STRICT SECTIONS -->
+  <div id="login-view" class="login-wrapper">
+    <div class="login-card" style="max-width: 500px;">
+      <div class="login-brand">
+        <div class="brand-icon" style="width: 52px; height: 52px; font-size: 1.6rem; margin: 0 auto 0.75rem;">🎯</div>
+        <h2>Club Activities Tracker</h2>
+        <p>Select your designated section to log in</p>
+      </div>
+
+      <!-- 3 STRICT SECTION TABS -->
+      <div class="section-selector-container">
+        <label class="section-selector-label">Choose Your Section / Portal:</label>
+        <div class="section-tabs-grid">
+          <button type="button" class="section-tab-btn active" id="sec-btn-admin" onclick="switchSection('Admin')">
+            <span class="sec-icon">👑</span>
+            <span class="sec-text">Admin</span>
+          </button>
+          <button type="button" class="section-tab-btn" id="sec-btn-officer" onclick="switchSection('Officer')">
+            <span class="sec-icon">⚡</span>
+            <span class="sec-text">Club Officer</span>
+          </button>
+          <button type="button" class="section-tab-btn" id="sec-btn-member" onclick="switchSection('Member')">
+            <span class="sec-icon">🎓</span>
+            <span class="sec-text">Student</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Section Info Box -->
+      <div id="section-info-banner" class="section-info-banner banner-admin">
+        <div id="section-info-title" style="font-weight: 700; font-size: 0.95rem;">👑 Administrator Section</div>
+        <div id="section-info-desc" style="font-size: 0.82rem; opacity: 0.95; margin-top: 0.2rem;">
+          Only Faculty Advisors & System Admins can log in here. (Students & Officers must use their designated section).
+        </div>
+      </div>
+
+      <!-- Auth Mode Switcher (Login vs Register) -->
+      <div class="auth-tabs-toggle" style="margin-top: 1rem;">
+        <button type="button" class="auth-tab-toggle-btn active" id="auth-toggle-login" onclick="switchAuthMode('login')">🔑 Sign In</button>
+        <button type="button" class="auth-tab-toggle-btn" id="auth-toggle-register" onclick="switchAuthMode('register')">✨ Register Account</button>
+      </div>
+
+      <div id="login-error" class="login-alert" style="display: none;"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" for="login-username" style="margin-bottom: 0;">Username</label>
+            <span id="login-hint-username" style="font-size: 0.76rem; color: var(--primary); font-weight: 600;">Default: admin</span>
+          </div>
+          <input type="text" class="form-control" id="login-username" placeholder="e.g. admin" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" for="login-password" style="margin-bottom: 0;">Password</label>
+            <span id="login-hint-password" style="font-size: 0.76rem; color: var(--primary); font-weight: 600;">Default: admin123</span>
+          </div>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" class="form-control" id="login-password" placeholder="e.g. admin123" required autocomplete="current-password" autocapitalize="none" style="padding-right: 2.75rem;">
+            <button type="button" id="btn-toggle-pwd" onclick="togglePasswordVisibility()" style="position: absolute; right: 0.6rem; background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.2rem; color: var(--gray-500);" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width: 100%; justify-content: center; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.95rem;">
+          🔑 Sign In to Admin Section &rarr;
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name *</label>
+          <input type="text" class="form-control" id="reg-name" placeholder="e.g. Maya Sharma" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-username">Username *</label>
+          <input type="text" class="form-control" id="reg-username" placeholder="Choose username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password *</label>
+          <input type="password" class="form-control" id="reg-password" placeholder="Create secure password" required autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-role">Role (Auto-selected for this Section) *</label>
+          <select class="form-control" id="reg-role">
+            <option value="Admin">Administrator (Admin Section)</option>
+            <option value="Officer">Club Officer (Officer Section)</option>
+            <option value="Member">Student Member (Student Section)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="reg-submit-btn" style="width: 100%; justify-content: center; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.95rem;">
+          ✨ Create Account & Sign In &rarr;
+        </button>
+      </form>
+
+      <!-- Section-Specific Demo Login Box -->
+      <div class="demo-logins-box" id="demo-logins-box">
+        <div class="demo-title" id="demo-box-title">⚡ 1-Click Demo Credentials for Admin:</div>
+        <div id="demo-buttons-container">
+          <!-- Populated dynamically based on selected section -->
+        </div>
+      </div>
+
+      <!-- Guest Option -->
+      <div style="margin-top: 1.15rem; text-align: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="browseAsGuest()" style="width: 100%; justify-content: center;">
+          👀 Browse Dashboard as Guest (Read Only)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MAIN APPLICATION -->
+  <div id="app-view" style="display: none;">
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="nav-container">
+        <a href="#" class="brand" onclick="switchTab('dashboard')">
+          <div class="brand-icon">🎯</div>
+          <span>Club Activities Tracker</span>
+        </a>
+
+        <!-- Section Indicator Badge in Top Navbar -->
+        <div class="nav-section-indicator" id="nav-section-indicator">
+          👑 Admin Section
+        </div>
+
+        <ul class="nav-links">
+          <li><button class="nav-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button></li>
+          <li><button class="nav-btn" id="tab-btn-activities" onclick="switchTab('activities')">📅 Activities & Events</button></li>
+          <li id="nav-item-members"><button class="nav-btn" id="tab-btn-members" onclick="switchTab('members')">👥 Members</button></li>
+          <li><button class="nav-btn" id="tab-btn-clubs" onclick="switchTab('clubs')">🏛️ Clubs</button></li>
+          <li id="nav-item-database"><button class="nav-btn" id="tab-btn-database" onclick="switchTab('database')">🗄️ Database & Logs</button></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-export-csv" onclick="exportData('activities')">📥 Export CSV</button>
+          <button class="btn btn-primary btn-sm" id="btn-quick-log" onclick="openActivityModal()">+ Log Activity</button>
+          
+          <!-- When Logged In: User Profile & Dedicated Logout Button -->
+          <div class="user-profile-badge" id="nav-user-badge" onclick="openProfileModal()" title="Click to view & edit your profile" style="cursor: pointer;">
+            <div class="user-avatar" id="nav-user-avatar">AD</div>
+            <div class="user-meta">
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span class="user-name" id="nav-user-name">Dr. Sarah Jenkins</span>
+                <span style="font-size: 0.72rem; opacity: 0.8;" title="Edit Profile">✏️</span>
+              </div>
+              <span class="badge badge-role" id="nav-user-role">Admin</span>
+            </div>
+          </div>
+          
+          <!-- PROMINENT LOGOUT BUTTON -->
+          <button class="btn btn-danger btn-sm" id="btn-logout" onclick="logout()" title="Logout from account" style="display: flex; align-items: center; gap: 0.35rem; font-weight: 600;">
+            <span>🚪</span> <span>Logout</span>
+          </button>
+
+          <!-- PROMINENT LOGIN BUTTON (Shown in guest mode) -->
+          <button class="btn btn-primary btn-sm" id="btn-login-guest" onclick="showLogin()" title="Sign in to your account" style="display: none; align-items: center; gap: 0.35rem; font-weight: 600;">
+            <span>🔑</span> <span>Sign In</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+  <main class="main-container">
+    
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="tab-pane active">
+      <!-- Student Portal Personalized Banner -->
+      <div id="student-welcome-banner" class="student-welcome-box" style="display: none; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div id="student-banner-avatar" style="width: 52px; height: 52px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 2px solid #3b82f6; overflow: hidden; background-size: cover; background-position: center; flex-shrink: 0;">
+              🎓
+            </div>
+            <div>
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.2rem;">
+                Welcome to the Student Section, <span id="student-name-display">Student</span>!
+              </h3>
+              <p style="font-size: 0.88rem; color: #3b82f6;">
+                Track registered club activities, RSVP for upcoming events, and download verified certificates of participation.
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openProfileModal()" style="font-weight: 600; border-color: #93c5fd; background: white; color: #1e3a8a;">
+              👤 Edit Profile & DP
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openCertificatesListModal()" style="background: #1e3a8a; border-color: #1e3a8a; font-weight: 600;">
+              📜 My Verified Certificates
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- 4 Top KPI Cards -->
+      <div class="stats-grid">
+        <div class="stat-card c-blue">
+          <div>
+            <div class="stat-label">Total Clubs</div>
+            <div class="stat-value" id="stat-clubs">0</div>
+          </div>
+          <div class="stat-icon">🏛️</div>
+        </div>
+
+        <div class="stat-card c-green">
+          <div>
+            <div class="stat-label">Total Activities</div>
+            <div class="stat-value" id="stat-activities">0</div>
+          </div>
+          <div class="stat-icon">🎯</div>
+        </div>
+
+        <div class="stat-card c-purple">
+          <div>
+            <div class="stat-label">Active Members</div>
+            <div class="stat-value" id="stat-members">0</div>
+          </div>
+          <div class="stat-icon">👥</div>
+        </div>
+
+        <div class="stat-card c-orange">
+          <div>
+            <div class="stat-label">Volunteer & Event Hours</div>
+            <div class="stat-value" id="stat-hours">0</div>
+          </div>
+          <div class="stat-icon">⏱️</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Visuals -->
+      <div class="dashboard-columns">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">📌 Activity Distribution by Category</h3>
+          </div>
+          <div id="category-bars-container">
+            <!-- Dynamic Category Breakdown Bars -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">⭐ Top Active Members</h3>
+          </div>
+          <div class="member-rank-list" id="top-members-container">
+            <!-- Dynamic Member Leaderboard -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activities Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">🕒 Recent Club Activities</h3>
+          <button class="btn btn-secondary btn-sm" onclick="switchTab('activities')">View All &rarr;</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Activity Title</th>
+                <th>Club</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Attendees</th>
+              </tr>
+            </thead>
+            <tbody id="recent-activities-table">
+              <!-- Dynamic Recent Activities -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Announcements / Notice Board -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-header">
+          <h3 class="card-title">📢 Club Announcements & Notice Board</h3>
+          <button class="btn btn-primary btn-sm" id="btn-post-notice" onclick="openAnnouncementModal()">+ Post Notice</button>
+        </div>
+        <div id="announcements-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+          <!-- Dynamic Announcements -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ACTIVITIES -->
+    <section id="tab-activities" class="tab-pane">
+      <div class="card-header" style="margin-bottom: 1.5rem; border: none; padding: 0; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2>Club Activities & Events</h2>
+          <p style="color: var(--gray-500); font-size: 0.9rem;">Schedule, track, take roll call, and view attendance forecasts.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <div class="view-toggle-pill-group">
+            <button type="button" class="view-toggle-btn active" id="btn-view-table" onclick="setActivitiesView('table')">📋 Table</button>
+            <button type="button" class="view-toggle-btn" id="btn-view-calendar" onclick="setActivitiesView('calendar')">🗓️ Calendar</button>
+          </div>
+          <button class="btn btn-secondary" onclick="openPredictorModal()" title="AI Event Turnout Forecaster">🔮 Turnout Predictor</button>
+          <button class="btn btn-primary" id="btn-add-activity-main" onclick="openActivityModal()">+ Log New Activity</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input" id="activity-search" placeholder="🔍 Search activity, title or location..." oninput="filterActivities()">
+        <select class="filter-select" id="activity-club-filter" onchange="filterActivities()">
+          <option value="">All Clubs</option>
+        </select>
+        <select class="filter-select" id="activity-status-filter" onchange="filterActivities()">
+          <option value="">All Statuses</option>
+          <option value="Planned">Planned</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="exportData('activities')">📥 Export CSV</button>
+      </div>
+
+      <!-- 1. TABLE VIEW -->
+      <div id="activities-table-container">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Club</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Duration</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Attendees</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="activities-table-body">
+              <!-- Dynamic activities list -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. INTERACTIVE CALENDAR VIEW -->
+      <div id="activities-calendar-container" style="display: none; margin-top: 1rem;">
+        <div class="calendar-header-bar">
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="changeCalendarMonth(-1)">&larr; Prev</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="changeCalendarMonth(1)">Next &rarr;</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetCalendarToCurrentMonth()">Today</button>
+          </div>
+          <h3 id="calendar-month-title" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--gray-900);">October 2026</h3>
+          <div class="calendar-legend">
+            <span class="legend-dot dot-workshop">Workshop</span>
+            <span class="legend-dot dot-competition">Competition</span>
+            <span class="legend-dot dot-social">Social</span>
+            <span class="legend-dot dot-meeting">Meeting</span>
+          </div>
+        </div>
+        
+        <div class="calendar-wrapper">
+          <div class="calendar-weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div class="calendar-grid" id="calendar-days-grid">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: MEMBERS -->
+    <section id="tab-members" class="tab-pane">
+      <div class="card-header" style="margin-bottom: 1.5rem; border: none; padding: 0;">
+        <div>
+          <h2>Members Directory</h2>
+          <p style="color: var(--gray-500); font-size: 0.9rem;">Manage rosters, leadership roles, and participation records.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-member-main" onclick="openMemberModal()">+ Add New Member</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input" id="member-search" placeholder="🔍 Search by name or email..." oninput="filterMembers()">
+        <select class="filter-select" id="member-club-filter" onchange="filterMembers()">
+          <option value="">All Clubs</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="exportData('attendance')">📥 Export Attendance CSV</button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Member Name</th>
+              <th>Club</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Join Date</th>
+              <th>Hours Credited</th>
+              <th>Events Attended</th>
+              <th>Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="members-table-body">
+            <!-- Dynamic members list -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: CLUBS -->
+    <section id="tab-clubs" class="tab-pane">
+      <div class="card-header" style="margin-bottom: 1.5rem; border: none; padding: 0;">
+        <div>
+          <h2>Registered Clubs</h2>
+          <p style="color: var(--gray-500); font-size: 0.9rem;">Explore active organizations, leadership, and member counts.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" id="btn-reload-sample" onclick="seedSampleData()">🔄 Reload Sample Data</button>
+          <button class="btn btn-primary" id="btn-add-club-main" onclick="openClubModal()">+ Create New Club</button>
+        </div>
+      </div>
+
+      <div class="grid-cards" id="clubs-grid-container">
+        <!-- Dynamic club cards -->
+      </div>
+    </section>
+
+    <!-- TAB 5: DATABASE & LOGS -->
+    <section id="tab-database" class="tab-pane">
+      <div class="card-header" style="margin-bottom: 1.5rem; border: none; padding: 0;">
+        <div>
+          <h2>🗄️ SQLite Database & Activity Logs</h2>
+          <p style="color: var(--gray-500); font-size: 0.9rem;">Live view of persistent database storage, registered users, and user authentication audit logs.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="fetchDatabaseOverview()">🔄 Refresh Database Logs</button>
+          <a href="/api/database/download" class="btn btn-primary" download="club_tracker.db" style="text-decoration: none; display: flex; align-items: center; gap: 0.4rem;">
+            <span>📥</span> <span>Download SQLite Database (.db)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Database Health & File Status Banner -->
+      <div class="db-status-banner" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 1.5rem; box-shadow: var(--shadow-md);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.5rem;">💾</span>
+              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #f8fafc;">SQLite Database: <span id="db-filename" style="color: #38bdf8;">club_tracker.db</span></h3>
+              <span class="badge" style="background: #10b981; color: white; font-size: 0.75rem; padding: 0.2rem 0.6rem;">🟢 Persistent & Connected</span>
+            </div>
+            <p style="margin: 0; font-size: 0.85rem; color: #94a3b8;">
+              Database Path: <code id="db-filepath" style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; color: #cbd5e1; font-family: monospace;">club_tracker.db</code>
+            </p>
+          </div>
+          <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Disk Size</div>
+              <div id="db-filesize" style="font-size: 1.3rem; font-weight: 800; color: #38bdf8;">-- KB</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Engine</div>
+              <div id="db-engine" style="font-size: 1.3rem; font-weight: 800; color: #f8fafc;">SQLite 3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Row Counts Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Users</div>
+            <div id="count-users" style="font-size: 1.15rem; font-weight: 700; color: #f8fafc;">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Login Logs</div>
+            <div id="count-login_logs" style="font-size: 1.15rem; font-weight: 700; color: #38bdf8;">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Clubs</div>
+            <div id="count-clubs" style="font-size: 1.15rem; font-weight: 700; color: #f8fafc;">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Members</div>
+            <div id="count-members" style="font-size: 1.15rem; font-weight: 700; color: #f8fafc;">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Activities</div>
+            <div id="count-activities" style="font-size: 1.15rem; font-weight: 700; color: #f8fafc;">--</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px;">
+            <div style="font-size: 0.75rem; color: #94a3b8;">Attendance Logs</div>
+            <div id="count-attendance" style="font-size: 1.15rem; font-weight: 700; color: #f8fafc;">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: LIVE LOGIN & AUDIT LOGS -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--gray-900);">
+              🔐 Live User Login & Session History (login_logs table)
+            </h3>
+            <p style="margin: 0.2rem 0 0 0; font-size: 0.82rem; color: var(--gray-500);">
+              Jab bhi koi user sign in karta hai, galat password daalta hai, ya logout hota hai, wo event yahan SQLite database me permanently record hota hai.
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="clearLoginLogs()" style="color: var(--danger); border-color: var(--gray-300);">
+            🗑️ Clear Logs
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Username</th>
+                <th>Name / Role</th>
+                <th>Portal Section</th>
+                <th>Auth Status</th>
+                <th>Client IP</th>
+                <th>Device / Browser</th>
+              </tr>
+            </thead>
+            <tbody id="db-login-logs-tbody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--gray-400); padding: 2rem;">Loading login logs from database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SECTION 2: REGISTERED USERS IN DATABASE -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--gray-900);">
+              👥 Registered Users Directory (users table)
+            </h3>
+            <p style="margin: 0.2rem 0 0 0; font-size: 0.82rem; color: var(--gray-500);">
+              All authorized user accounts stored in the SQLite database with encrypted SHA-256 password security.
+            </p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Assigned Role</th>
+                <th>Assigned Club</th>
+                <th>Password Security</th>
+                <th>Created At</th>
+                <th>Last Active Login</th>
+              </tr>
+            </thead>
+            <tbody id="db-users-tbody">
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--gray-400); padding: 2rem;">Loading registered users...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD / EDIT ACTIVITY -->
+  <div class="modal-backdrop" id="modal-activity">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="activity-modal-title">Log Club Activity</h3>
+        <button class="close-btn" onclick="closeModal('modal-activity')">&times;</button>
+      </div>
+      <form id="activity-form" onsubmit="saveActivity(event)">
+        <div class="modal-body">
+          <input type="hidden" id="act-id">
+          
+          <div class="form-group">
+            <label class="form-label" for="act-club">Club *</label>
+            <select class="form-control" id="act-club" required>
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="act-title">Activity Title *</label>
+            <input type="text" class="form-control" id="act-title" placeholder="e.g. AI Hands-on Workshop" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="act-category">Category *</label>
+              <select class="form-control" id="act-category" required>
+                <option value="Workshop">Workshop</option>
+                <option value="Meeting">Meeting</option>
+                <option value="Competition">Competition</option>
+                <option value="Volunteer/Service">Volunteer/Service</option>
+                <option value="Social">Social</option>
+                <option value="Fundraiser">Fundraiser</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="act-date">Date *</label>
+              <input type="date" class="form-control" id="act-date" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="act-duration">Duration (Hours) *</label>
+              <input type="number" step="0.5" min="0.5" max="24" class="form-control" id="act-duration" value="1.5" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="act-status">Status *</label>
+              <select class="form-control" id="act-status" required>
+                <option value="Planned">Planned</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="act-location">Location / Venue</label>
+            <input type="text" class="form-control" id="act-location" placeholder="e.g. Lab 304 / Online Zoom">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="act-desc">Description</label>
+            <textarea class="form-control" id="act-desc" rows="3" placeholder="Brief activity agenda, outcomes, or instructions..."></textarea>
+          </div>
+
+          <!-- LIVE AI ATTENDANCE PREDICTION BADGE -->
+          <div class="ai-live-prediction-box" id="modal-act-ai-prediction">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #4338ca; display: flex; align-items: center; gap: 0.35rem;">
+                <span>🔮</span> <span>AI Attendance Forecast:</span>
+              </span>
+              <span id="live-pred-confidence" style="font-size: 0.72rem; background: #e0e7ff; color: #3730a3; padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 700;">88% Confidence</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.35rem;">
+              <span id="live-pred-count" style="font-size: 1.25rem; font-weight: 800; color: #1e1b4b;">~18 Attendees</span>
+              <span id="live-pred-badge" class="badge" style="background: #fef3c7; color: #92400e; font-size: 0.75rem;">⚡ Strong Demand</span>
+            </div>
+            <div id="live-pred-tip" style="font-size: 0.78rem; color: #4b5563; margin-top: 0.25rem;">
+              Analyzing past turnout for this category and day...
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-activity')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Activity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT MEMBER -->
+  <div class="modal-backdrop" id="modal-member">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="member-modal-title">Add Member</h3>
+        <button class="close-btn" onclick="closeModal('modal-member')">&times;</button>
+      </div>
+      <form id="member-form" onsubmit="saveMember(event)">
+        <div class="modal-body">
+          <input type="hidden" id="member-id">
+          
+          <div class="form-group">
+            <label class="form-label" for="member-club">Club *</label>
+            <select class="form-control" id="member-club" required>
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="member-name">Full Name *</label>
+            <input type="text" class="form-control" id="member-name" placeholder="e.g. Alex Morgan" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="member-email">Email Address</label>
+            <input type="email" class="form-control" id="member-email" placeholder="alex.morgan@example.edu">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="member-role">Role</label>
+              <select class="form-control" id="member-role">
+                <option value="Member">Member</option>
+                <option value="President">President</option>
+                <option value="Vice President">Vice President</option>
+                <option value="Secretary">Secretary</option>
+                <option value="Treasurer">Treasurer</option>
+                <option value="Officer">Officer</option>
+                <option value="Volunteer">Volunteer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="member-status">Status</label>
+              <select class="form-control" id="member-status">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-member')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT CLUB -->
+  <div class="modal-backdrop" id="modal-club">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="club-modal-title">Create New Club</h3>
+        <button class="close-btn" onclick="closeModal('modal-club')">&times;</button>
+      </div>
+      <form id="club-form" onsubmit="saveClub(event)">
+        <div class="modal-body">
+          <input type="hidden" id="club-id">
+
+          <div class="form-group">
+            <label class="form-label" for="club-name">Club Name *</label>
+            <input type="text" class="form-control" id="club-name" placeholder="e.g. Robotics & Automation Society" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="club-category">Category *</label>
+              <select class="form-control" id="club-category" required>
+                <option value="Technology">Technology</option>
+                <option value="Academic">Academic</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Arts & Music">Arts & Music</option>
+                <option value="Community Service">Community Service</option>
+                <option value="Sports & Fitness">Sports & Fitness</option>
+                <option value="Leadership">Leadership</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="club-lead">Club Lead / President</label>
+              <input type="text" class="form-control" id="club-lead" placeholder="e.g. Maya Patel">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="club-desc">Description</label>
+            <textarea class="form-control" id="club-desc" rows="3" placeholder="Mission, regular meeting schedules, goals..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-club')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Club</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ATTENDANCE & ROLL CALL -->
+  <div class="modal-backdrop" id="modal-attendance">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">📝 Roll Call & Attendance</h3>
+          <p id="attendance-modal-sub" style="font-size: 0.85rem; color: var(--gray-500); margin-top: 0.2rem;"></p>
+        </div>
+        <button class="close-btn" onclick="closeModal('modal-attendance')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div style="font-size: 0.9rem; font-weight: 600; color: var(--gray-700);">
+            Roster Members: <span id="attendance-count">0</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="markAllAttendance('Present')">Mark All Present</button>
+            <button class="btn btn-secondary btn-sm" onclick="markAllAttendance('Absent')">Mark All Absent</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Hours Credited</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-table-body">
+              <!-- Dynamic attendance rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-attendance')">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submitAttendance()">Save Attendance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: POST ANNOUNCEMENT -->
+  <div class="modal-backdrop" id="modal-announcement">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Post Club Announcement</h3>
+        <button class="close-btn" onclick="closeModal('modal-announcement')">&times;</button>
+      </div>
+      <form id="announcement-form" onsubmit="saveAnnouncement(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="ann-club">Club *</label>
+            <select class="form-control" id="ann-club" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ann-title">Title *</label>
+            <input type="text" class="form-control" id="ann-title" placeholder="e.g. Volunteer Call / Fest Update" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ann-priority">Priority</label>
+              <select class="form-control" id="ann-priority">
+                <option value="Normal">Normal</option>
+                <option value="Important">Important</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ann-date">Date</label>
+              <input type="date" class="form-control" id="ann-date" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ann-content">Notice Details *</label>
+            <textarea class="form-control" id="ann-content" rows="3" placeholder="Write full details..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-announcement')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Post Announcement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AI TURNOUT PREDICTOR SIMULATOR -->
+  <div class="modal-backdrop" id="modal-predictor">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>🔮</span> <span>AI Event Attendance & Turnout Predictor</span>
+        </h3>
+        <button class="close-btn" onclick="closeModal('modal-predictor')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--gray-600); margin-bottom: 1rem;">
+          Forecast student turnout before scheduling using historical club attendance baselines, category draw multipliers, day-of-week indices, and duration sweet-spots.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: var(--gray-50); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="sim-club">Organizing Club</label>
+            <select class="form-control" id="sim-club" onchange="runSimulation()"></select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="sim-category">Event Category</label>
+            <select class="form-control" id="sim-category" onchange="runSimulation()">
+              <option value="Workshop">Workshop</option>
+              <option value="Competition">Competition / Hackathon</option>
+              <option value="Social">Social / Fest</option>
+              <option value="Seminar">Seminar / Speaker</option>
+              <option value="Meeting">Meeting</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="sim-date">Planned Date</label>
+            <input type="date" class="form-control" id="sim-date" onchange="runSimulation()">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="sim-duration">Duration: <strong id="sim-duration-val">2.5h</strong></label>
+            <input type="range" min="0.5" max="8.0" step="0.5" value="2.5" class="form-control" id="sim-duration" oninput="document.getElementById('sim-duration-val').textContent = this.value + 'h'; runSimulation()">
+          </div>
+        </div>
+
+        <!-- PREDICTION RESULTS CARD -->
+        <div class="predictor-result-card" id="predictor-result-card">
+          <div class="pred-kpi-grid">
+            <div class="pred-kpi-item">
+              <div class="pred-kpi-label">Estimated Attendance</div>
+              <div class="pred-kpi-value" id="sim-res-count">~35</div>
+              <div class="pred-kpi-sub" id="sim-res-range">Range: 31 – 39 attendees</div>
+            </div>
+            <div class="pred-kpi-item">
+              <div class="pred-kpi-label">Turnout Rating</div>
+              <div class="pred-kpi-value" id="sim-res-demand" style="color: #f59e0b; font-size: 1.3rem;">⚡ Strong Demand</div>
+              <div class="pred-kpi-sub" id="sim-res-day">Peak Friday Schedule</div>
+            </div>
+            <div class="pred-kpi-item">
+              <div class="pred-kpi-label">Model Confidence</div>
+              <div class="pred-kpi-value" id="sim-res-conf" style="color: #4338ca;">88%</div>
+              <div class="pred-kpi-sub">Based on past activities</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--gray-800); margin-bottom: 0.5rem;">💡 Strategic Recommendations:</h4>
+            <ul id="sim-res-insights" class="pred-insights-list">
+              <!-- Populated dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-predictor')">Close</button>
+        <button type="button" class="btn btn-primary" onclick="applySimulationToNewActivity()">+ Use in New Activity Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EVENT DETAILS & RSVP -->
+  <div class="modal-backdrop" id="modal-event-detail">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="event-detail-title">Activity Details</h3>
+        <button class="close-btn" onclick="closeModal('modal-event-detail')">&times;</button>
+      </div>
+      <div class="modal-body" id="event-detail-body">
+        <!-- Populated dynamically via JS -->
+      </div>
+      <div class="modal-footer" id="event-detail-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-event-detail')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STUDENT CERTIFICATES LIST -->
+  <div class="modal-backdrop" id="modal-student-certificates">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>📜</span> <span>My Verified Participation Certificates</span>
+        </h3>
+        <button class="close-btn" onclick="closeModal('modal-student-certificates')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--gray-600); margin-bottom: 1rem;">
+          Official certificates generated for completed club activities and verified volunteer hours. Click <strong>"View & Print"</strong> to preview or save as PDF.
+        </p>
+        <div id="student-certs-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-student-certificates')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OFFICIAL VERIFIED CERTIFICATE (PRINTABLE) -->
+  <div class="modal-backdrop" id="modal-certificate">
+    <div class="modal-content modal-lg" style="max-width: 840px;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--gray-200);">
+        <h3 class="modal-title">Official Certificate Preview</h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="printCertificate()">🖨️ Print / Save as PDF</button>
+          <button class="close-btn" onclick="closeModal('modal-certificate')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" style="background: #f8fafc; padding: 1.5rem; display: flex; justify-content: center;">
+        <!-- CERTIFICATE FRAME (Print Optimized) -->
+        <div id="printable-certificate" class="certificate-container">
+          <div class="cert-border-outer">
+            <div class="cert-border-inner">
+              <div class="cert-header">
+                <div class="cert-emblem">🏛️</div>
+                <div class="cert-org-name">COLLEGIATE STUDENT ACTIVITIES COUNCIL</div>
+                <div class="cert-title">CERTIFICATE OF PARTICIPATION</div>
+                <div class="cert-subtitle">FOR DEDICATED STUDENT SERVICE & CO-CURRICULAR EXCELLENCE</div>
+              </div>
+
+              <div class="cert-body">
+                <p class="cert-p1">This is to officially certify that</p>
+                <div class="cert-recipient-name" id="cert-student-name">Sneha Reddy</div>
+                <p class="cert-p2">
+                  has actively participated in the activity <strong id="cert-activity-title">HackNation: 24-Hour AI Sprint</strong>
+                  organized by <span id="cert-club-name" style="font-weight: 700;">Coding Club</span> on <span id="cert-date" style="font-weight: 600;">2026-09-18</span>.
+                </p>
+                <div class="cert-hours-pill">
+                  ⏱️ Verified Co-Curricular Credit: <strong id="cert-hours">8.0 Volunteer & Lab Hours</strong>
+                </div>
+              </div>
+
+              <div class="cert-footer">
+                <div class="cert-sign-block">
+                  <div class="cert-signature-line"></div>
+                  <div class="cert-signer-name" id="cert-club-lead">Aarav Sharma</div>
+                  <div class="cert-signer-title">Club Lead / Coordinator</div>
+                </div>
+
+                <div class="cert-seal-block">
+                  <div class="cert-seal-gold">
+                    <div class="seal-inner">★ OFFICIAL VERIFIED ★</div>
+                  </div>
+                  <div class="cert-serial-id" id="cert-serial-id">CAC-2026-9E4B21</div>
+                </div>
+
+                <div class="cert-sign-block">
+                  <div class="cert-signature-line"></div>
+                  <div class="cert-signer-name">Dr. Sarah Jenkins</div>
+                  <div class="cert-signer-title">Dean of Student Affairs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-certificate')">Close</button>
+        <button type="button" class="btn btn-primary" onclick="printCertificate()">🖨️ Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: USER PROFILE & CUSTOM DP -->
+  <div class="modal-backdrop" id="modal-profile">
+    <div class="modal-content" style="max-width: 650px; padding: 0; overflow: hidden; border-radius: var(--radius-lg);">
+      <!-- Profile Modal Header Banner -->
+      <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%); padding: 2rem 1.5rem 1.25rem; color: white; position: relative;">
+        <button class="close-btn" onclick="closeModal('modal-profile')" style="position: absolute; top: 1rem; right: 1rem; color: white; background: rgba(0,0,0,0.2); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: none; cursor: pointer;">&times;</button>
+        
+        <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+          <!-- DP Container with live preview and upload overlay -->
+          <div style="position: relative; width: 88px; height: 88px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+            <div id="modal-profile-dp-preview" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.75rem; background-size: cover; background-position: center;">
+              🎓
+            </div>
+            <!-- Click to upload overlay icon -->
+            <label for="profile-avatar-upload" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.75); color: white; text-align: center; font-size: 0.65rem; padding: 3px 0; cursor: pointer; font-weight: 600;" title="Click to upload custom picture">
+              📷 Upload
+            </label>
+            <input type="file" id="profile-avatar-upload" accept="image/*" style="display: none;" onchange="handleCustomAvatarUpload(event)">
+          </div>
+
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h3 id="modal-profile-title-name" style="margin: 0; font-size: 1.35rem; font-weight: 800; color: white;">User Profile</h3>
+              <span id="modal-profile-role-badge" class="badge" style="background: rgba(255,255,255,0.25); color: white; font-weight: 700; border: 1px solid rgba(255,255,255,0.4);">Member</span>
+            </div>
+            <p id="modal-profile-subtitle" style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #e0e7ff;">@username</p>
+          </div>
+        </div>
+
+        <!-- Quick DP Avatar Picker -->
+        <div style="margin-top: 1rem; background: rgba(0,0,0,0.18); padding: 0.65rem 0.85rem; border-radius: 8px;">
+          <div style="font-size: 0.75rem; font-weight: 600; color: #e0e7ff; margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>✨ Select Preset Avatar or Upload Custom Photo:</span>
+            <label for="profile-avatar-upload" style="cursor: pointer; color: #93c5fd; text-decoration: underline; font-size: 0.75rem; font-weight: 600;">
+              📁 Upload from Device
+            </label>
+          </div>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🎓')">🎓</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('💻')">💻</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🚀')">🚀</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('👑')">👑</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('⚡')">⚡</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🎨')">🎨</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🔬')">🔬</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🤖')">🤖</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🐱')">🐱</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🦊')">🦊</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🦁')">🦁</button>
+            <button type="button" class="preset-avatar-btn" onclick="selectPresetAvatar('🌟')">🌟</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Form Body -->
+      <form id="profile-form" onsubmit="saveUserProfile(event)">
+        <div class="modal-body" style="padding: 1.5rem; max-height: 58vh; overflow-y: auto;">
+          <input type="hidden" id="profile-avatar-val">
+
+          <!-- Section A: Personal & Contact Information -->
+          <div style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>👤</span> <span>Personal & Contact Details</span>
+            </h4>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profile-name">Full Name *</label>
+                <input type="text" class="form-control" id="profile-name" required placeholder="e.g. Sneha Reddy">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-username">Username (Account ID)</label>
+                <input type="text" class="form-control" id="profile-username" readonly style="background: var(--gray-100); color: var(--gray-600);">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profile-email">Email Address</label>
+                <input type="email" class="form-control" id="profile-email" placeholder="e.g. sneha.r@campus.edu">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-phone">Phone Number</label>
+                <input type="tel" class="form-control" id="profile-phone" placeholder="e.g. +91 98765 43210">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-bio">Bio / About Me</label>
+              <textarea class="form-control" id="profile-bio" rows="2" placeholder="Tell other club members about yourself, your goals, or projects you love building..."></textarea>
+            </div>
+          </div>
+
+          <!-- Section B: Academic & Campus Info -->
+          <div style="margin-bottom: 1.25rem; border-top: 1px solid var(--gray-200); padding-top: 1.25rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>🎓</span> <span>Academic & Campus Details</span>
+            </h4>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profile-dept">Department / Branch</label>
+                <input type="text" class="form-control" id="profile-dept" placeholder="e.g. Computer Science & Engineering">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-studentid">Roll No. / Student ID</label>
+                <input type="text" class="form-control" id="profile-studentid" placeholder="e.g. 2024BCSE089">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profile-year">Academic Year / Semester</label>
+                <input type="text" class="form-control" id="profile-year" placeholder="e.g. 2nd Year (4th Sem)">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-club">Associated Club</label>
+                <input type="text" class="form-control" id="profile-club" readonly style="background: var(--gray-100); color: var(--gray-600);">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section C: Skills & Social Profiles -->
+          <div style="margin-bottom: 1.25rem; border-top: 1px solid var(--gray-200); padding-top: 1.25rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>🚀</span> <span>Skills & Portfolio Links</span>
+            </h4>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-skills">Technical & Creative Skills (comma separated)</label>
+              <input type="text" class="form-control" id="profile-skills" placeholder="e.g. Python, Machine Learning, UI/UX, Public Speaking">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profile-linkedin">LinkedIn URL</label>
+                <input type="text" class="form-control" id="profile-linkedin" placeholder="e.g. linkedin.com/in/username">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-github">GitHub / Portfolio URL</label>
+                <input type="text" class="form-control" id="profile-github" placeholder="e.g. github.com/username">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section D: Security (Optional Change Password) -->
+          <div style="border-top: 1px solid var(--gray-200); padding-top: 1.25rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--gray-800); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>🔐</span> <span>Change Password (Optional)</span>
+            </h4>
+
+            <div class="form-group">
+              <label class="form-label" for="profile-new-pwd">New Password (Leave blank to keep unchanged)</label>
+              <input type="password" class="form-control" id="profile-new-pwd" placeholder="Enter new password (min 4 characters)">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 1rem 1.5rem; background: var(--gray-50); border-top: 1px solid var(--gray-200);">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-profile')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-profile" style="font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+            <span>💾</span> <span>Save Profile Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  </div> <!-- End #app-view -->
+
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
